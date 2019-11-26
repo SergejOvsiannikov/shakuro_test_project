@@ -1,0 +1,19 @@
+default: &default
+  host: localhost
+  adapter: postgresql
+  encoding: unicode
+
+development:
+  <<: *default
+  database: shacuro_test_dev
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  database: shacuro_test_test
+
+# production:
+#   <<: *default
+#   database: db/production.sqlite3
