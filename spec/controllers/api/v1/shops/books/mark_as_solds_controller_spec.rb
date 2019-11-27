@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Api::V1::Shop::Book::MarkAsSoldsController, type: :controller do
+describe Api::V1::Shops::Books::MarkAsSoldsController, type: :controller do
   describe 'POST create' do
     subject { post :create, params: { book_id: book_id, shop_id: shop_id, number_of_copies: number_of_copies } }
 
@@ -23,16 +23,6 @@ describe Api::V1::Shop::Book::MarkAsSoldsController, type: :controller do
     end
 
     describe 'errors' do
-      context 'when no book_id param' do
-        let!(:shop) { create(:shop) }
-        let!(:book_id) { nil }
-        let!(:shop_id) { shop.id }
-        let!(:number_of_copies) { 1 }
-
-        specify { is_expected.to have_http_status(404) }
-        specify { expect(subject.body).to eq({ result: 'error', message: "book_id param is required" }.to_json) }
-      end
-
       context 'when no book in DB' do
         let!(:shop) { create(:shop) }
         let!(:book_id) { shop.id }
@@ -40,17 +30,7 @@ describe Api::V1::Shop::Book::MarkAsSoldsController, type: :controller do
         let!(:number_of_copies) { 1 }
 
         specify { is_expected.to have_http_status(404) }
-        specify { expect(subject.body).to eq({ result: 'error', message: "Book with current book_id is not found" }.to_json) }
-      end
-
-      context 'when no shop_id param' do
-        let!(:book) { create(:book) }
-        let!(:book_id) { book.id }
-        let!(:shop_id) { nil }
-        let!(:number_of_copies) { 1 }
-
-        specify { is_expected.to have_http_status(404) }
-        specify { expect(subject.body).to eq({ result: 'error', message: "shop_id param is required" }.to_json) }
+        specify { expect(subject.body).to eq({ result: 'error', message: "Couldn't find Book with 'id'=#{book_id}" }.to_json) }
       end
 
       context 'when no shop in DB' do
@@ -60,7 +40,7 @@ describe Api::V1::Shop::Book::MarkAsSoldsController, type: :controller do
         let!(:number_of_copies) { 1 }
 
         specify { is_expected.to have_http_status(404) }
-        specify { expect(subject.body).to eq({ result: 'error', message: "Shop with current shop_id is not found" }.to_json) }
+        specify { expect(subject.body).to eq({ result: 'error', message: "Couldn't find Shop with 'id'=#{shop_id}" }.to_json) }
       end
 
       context 'when no number_of_copies param' do
@@ -93,7 +73,7 @@ describe Api::V1::Shop::Book::MarkAsSoldsController, type: :controller do
         let!(:number_of_copies) { 1 }
 
         specify { is_expected.to have_http_status(404) }
-        specify { expect(subject.body).to eq({ result: 'error', message: "Book with current book_id is not selling in current shop" }.to_json) }
+        specify { expect(subject.body).to eq({ result: 'error', message: "Book with id=#{book_id} is not selling in shop with id=#{shop_id}" }.to_json) }
       end
 
       context 'when no copies in stock' do

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Api::V1::Publisher::ShopsController, type: :controller do
+describe Api::V1::Publishers::ShopsController, type: :controller do
   describe 'GET index' do
     subject { get :index, params: { publisher_id: publisher_id } }
 
@@ -16,7 +16,7 @@ describe Api::V1::Publisher::ShopsController, type: :controller do
 
       before do
         [random_book, publisher_book_1, publisher_book_2].each do |book|
-          create :books_shop, shop: shop, book: book, books_in_stock: 1, sold_books: 1
+          create(:books_shop, shop: shop, book: book, books_in_stock: 1, sold_books: 1)
         end
       end
 
@@ -46,18 +46,30 @@ describe Api::V1::Publisher::ShopsController, type: :controller do
         expect(book_2_response['title']).to eq publisher_book_2.name
         expect(book_2_response['copies_in_stock']).to eq 1
       end
-    end
 
-    context 'with no publisher_id' do
-      let(:publisher_id) { nil }
-      specify { is_expected.to have_http_status(404) }
-      specify { expect(subject.body).to eq({ result: 'error', message: 'publisher_id must be present' }.to_json) }
+      context 'when more shops' do
+        let!(:shop_2) { create :shop }
+
+        before do
+          [random_book, publisher_book_1, publisher_book_2].each do |book|
+            create(:books_shop, shop: shop_2, book: book, books_in_stock: 10, sold_books: 3)
+          end
+        end
+
+        specify do
+          parsed_response = JSON.parse(subject.body)
+
+          expect(parsed_response['shops'].count ).to eq 2
+          expect(parsed_response['shops'].first['id']).to eq shop_2.id
+          expect(parsed_response['shops'].last['id']).to eq shop.id
+        end
+      end
     end
 
     context 'with no publisher in DB' do
       let(:publisher_id) { 0 }
       specify { is_expected.to have_http_status(404) }
-      specify { expect(subject.body).to eq({ result: "error", message: "publisher with #{publisher_id} not found" }.to_json) }
+      specify { expect(subject.body).to eq({ result: "error", message: "Couldn't find Publisher with 'id'=#{publisher_id}" }.to_json) }
     end
   end
 end

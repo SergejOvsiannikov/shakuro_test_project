@@ -1,11 +1,11 @@
 module Api
   module V1
-    module Publisher
+    module Publishers
       class ShopSerializer < ActiveModel::Serializer
         attributes :id, :name, :books_sold_count, :books_in_stock
 
         def books_sold_count
-          self.object.books_shops.by_book(instance_options[:publisher].books).pluck(:sold_books).sum
+          self.object.books_sold_count #books_shops.by_book(instance_options[:publisher].books).pluck(:sold_books).sum
         end
 
         def books_in_stock
